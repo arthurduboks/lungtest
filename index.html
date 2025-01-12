@@ -1,1 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
 
+      body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #0a0a0a;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        padding: 16px;
+        overflow: hidden;
+      }
+
+      .app-header {
+        width: 100%;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        background: linear-gradient(
+          180deg,
+          rgba(26, 26, 26, 0.9) 0%,
+          rgba(26, 26, 26, 0) 100%
+        );
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        position: fixed;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .header-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        background: rgba(0, 162, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header-icon svg {
+        width: 16px;
+        height: 16px;
+        color: #00a2ff;
+      }
+
+      .header-text {
+        color: white;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+      }
+
+      .header-time {
+        color: #00a2ff;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 6px 12px;
+        background: rgba(0, 162, 255, 0.1);
+        border-radius: 20px;
+      }
+
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding-top: 60px; /* Account for fixed header */
+        padding-bottom: 20px;
+        gap: 32px;
+      }
+
+      .timer-container {
+        position: relative;
+        width: 85vw;
+        height: 85vw;
+        max-width: 400px;
+        max-height: 400px;
+      }
+
+      .timer-circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        box-sizing: border-box;
+        box-shadow: 0 0 30px rgba(0, 162, 255, 0.1);
+      }
+
+      .progress-circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transform: rotate(-90deg);
+      }
+
+      .progress-circle circle {
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: #00a2ff;
+        stroke-width: 3;
+        stroke-linecap: round;
+        transform: translate(1.5px, 1.5px);
+        transition: stroke-dashoffset 0.1s linear;
+        filter: drop-shadow(0 0 8px rgba(0, 162, 255, 0.5));
+      }
+
+      .inner-circle {
+        position: absolute;
+        width: 82%;
+        height: 82%;
+        top: 9%;
+        left: 9%;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, #1a1a1a, #151515);
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+
+      .timer-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 100%;
+      }
+
+      .timer-display {
+        font-size: 48px;
+        color: white;
+        font-weight: 300;
+        margin-bottom: 8px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 2px;
+      }
+
+      .timer-label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: -20px;
+      }
+
+      .stat {
+        text-align: center;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        min-width: 120px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: 500;
+        color: #00a2ff;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 380px) {
+        .timer-container {
+          width: 90vw;
+          height: 90vw;
+        }
+
+        .main-container {
+          padding-top: 80px;
+          gap: 24px;
+        }
+
+        .timer-display {
+          font-size: 40px;
+        }
+
+        .stat {
+          padding: 6px 12px;
+        }
+      }
+
+      @media (min-height: 700px) {
+        .main-container {
+          padding-top: 100px;
+        }
+      }
+
+      .running .timer-container {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15.536 8.464a5 5 0 010 7.072M12 18c-3.312 0-6-2.688-6-6s2.688-6 6-6M18.364 5.636a9 9 0 010 12.728"
+            />
+          </svg>
+        </div>
+        <div class="header-text">Breathing Test</div>
+      </div>
+      <div class="header-time">35s</div>
+    </div>
+
+    <div class="main-container">
+      <div class="timer-container">
+        <div class="timer-circle"></div>
+        <div class="inner-circle"></div>
+        <svg class="progress-circle">
+          <circle cx="50%" cy="50%" r="48.5%"></circle>
+        </svg>
+        <div class="timer-content">
+          <div class="timer-display">00:00</div>
+          <div class="timer-label">Tap to Start</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">0%</div>
+          <div class="stat-label">Lung Health</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const display = document.querySelector(".timer-display");
+      const label = document.querySelector(".timer-label");
+      const progressCircle = document.querySelector(".progress-circle circle");
+      const radius = progressCircle.r.baseVal.value;
+      const circumference = 2 * Math.PI * radius;
+      let timeElapsed = 0;
+      let timerId = null;
+      const HEALTHY_BENCHMARK = 35; // 35 seconds benchmark
+
+      progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+      progressCircle.style.strokeDashoffset = circumference;
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+          .toString()
+          .padStart(2, "0")}`;
+      }
+
+      function updateTimer() {
+        timeElapsed++;
+        display.textContent = formatTime(timeElapsed);
+
+        // Calculate progress for circle (max at 35s)
+        const progress = Math.min(timeElapsed / HEALTHY_BENCHMARK, 1);
+        const offset = circumference - progress * circumference;
+        progressCircle.style.strokeDashoffset = offset;
+
+        // Update lung health percentage
+        const healthPercentage = Math.min(
+          Math.round((timeElapsed / HEALTHY_BENCHMARK) * 100),
+          100
+        );
+        document.querySelector(
+          ".stat-value"
+        ).textContent = `${healthPercentage}%`;
+      }
+
+      function startTimer() {
+        if (timerId === null) {
+          timeElapsed = 0;
+          progressCircle.style.strokeDashoffset = circumference;
+          document.querySelector(".stat-value").textContent = "0%";
+          label.textContent = "Tap to Stop";
+          updateTimer();
+          timerId = setInterval(updateTimer, 1000);
+        } else {
+          stopTimer();
+        }
+      }
+
+      function stopTimer() {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+          label.textContent = "Tap to Restart";
+        }
+      }
+
+      document
+        .querySelector(".timer-container")
+        .addEventListener("click", startTimer);
+    </script>
+  </body>
+</html>
